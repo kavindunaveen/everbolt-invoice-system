@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Invoices</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #007244, #bfbfbf, #ff9933);
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            padding-top: 80px;
+        }
+        .footer {
+            color: #fff;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 40px;
+        }
+        mark {
+            background-color: yellow;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+    <div class="container-fluid">
+        <div class="mx-auto text-center">
+            <a class="navbar-brand" href="{% url 'upload_invoice' %}">⬅ Back to Upload</a>
+        </div>
+        <div class="ms-auto">
+            <span class="me-3 fw-semibold">Hi, {{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger btn-sm">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<div class="container mt-5">
+    <h4 class="mb-4">All Uploaded Invoices</h4>
+
+    <form method="get" class="mb-3" style="max-width: 600px; margin: auto;">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search by file name..." value="{{ query }}">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <ul class="list-group mb-3">
+        {% for invoice in page_obj %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <span>
+                    {% with name=invoice.file.name|slice:"8:" %}
+                        {% if query %}
+                            {% with remaining=name|cut:query %}
+                                {{ remaining }}<mark>{{ query }}</mark>
+                            {% endwith %}
+                        {% else %}
+                            {{ name }}
+                        {% endif %}
+                    {% endwith %}
+                </span><br>
+                <small class="text-muted">{{ invoice.uploaded_at|date:"Y-m-d H:i A" }}</small>
+            </div>
+            <div>
+                <a href="{{ invoice.file.url }}" class="btn btn-sm btn-outline-primary me-2" download>Download</a>
+                {% if user.is_superuser %}
+                    <a href="{% url 'delete_invoice' invoice.id %}" class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Are you sure you want to delete this invoice?');">Delete</a>
+                {% endif %}
+            </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No invoices found.</li>
+        {% endfor %}
+    </ul>
+
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+
+<div class="footer">
+    Project by IT Department of Everbolt Engineering (Pvt) Ltd
+</div>
+
+</body>
+</html>

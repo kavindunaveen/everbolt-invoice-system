@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Invoice</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #007244, #bfbfbf, #007244);
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            padding-top: 80px;
+        }
+        .navbar-brand img {
+            height: 40px;
+        }
+        .upload-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            margin: auto;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        .footer {
+            color: #fff;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-top: 40px;
+        }
+        mark {
+            background-color: yellow;
+            padding: 0 2px;
+        }
+        #preview {
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
+    <div class="container-fluid">
+        <div class="mx-auto text-center">
+            <a class="navbar-brand" href="#"></a>
+        </div>
+        <div class="ms-auto">
+            <span class="me-3 fw-semibold">Hi, {{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger btn-sm">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+{% endif %}
+
+<div class="upload-box mt-4">
+    <h4 class="mb-4">Upload Invoice</h4>
+    <form method="POST" enctype="multipart/form-data" action="">
+
+        {% csrf_token %}
+        <input type="file" name="file" accept="image/*" capture="environment" class="form-control mb-3" onchange="showPreview(event)">
+        <img id="preview" src="#" class="img-fluid rounded d-none mb-3" alt="Preview" />
+        <button type="submit" class="btn btn-success d-none" id="submitBtn">Submit</button>
+    </form>
+    
+</div>
+
+<div class="container mt-5">
+    <form id="searchForm" method="get" class="mb-3" style="max-width: 600px; margin: auto;">
+        <div class="input-group">
+            <input type="text" id="searchInput" name="q" class="form-control" placeholder="Search by file name..." value="{{ query }}">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <div class="card p-4 shadow-sm">
+        <h5 class="mb-3">Uploaded Invoices</h5>
+        <p class="text-muted">📦 {{ total_this_month }} invoices uploaded in {{ current_month }}</p>
+        <div id="invoice-loading" class="text-center text-muted my-2" style="display: none;">
+            Loading...
+        </div>
+        <ul class="list-group" id="invoiceList">
+        {% for invoice in invoices|slice:":10" %}
+            {% with filename=invoice.file.name|slice:"8:" %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span>
+                        {% if query %}
+                            {% with match=filename|cut:query %}{{ match }}<mark>{{ query }}</mark>{% endwith %}
+                        {% else %}
+                            {{ filename }}
+                        {% endif %}
+                    </span><br>
+                    <small class="text-muted">{{ invoice.uploaded_at|date:"Y-m-d H:i A" }}</small>
+                </div>
+                <div>
+                    <a href="{{ invoice.file.url }}" class="btn btn-sm btn-outline-primary me-2" download>Download</a>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'delete_invoice' invoice.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this invoice?');">Delete</a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endwith %}
+        {% empty %}
+            <li class="list-group-item">No invoices uploaded yet.</li>
+        {% endfor %}
+        </ul>
+        {% if invoices|length > 10 %}
+        <div class="text-center mt-3">
+            <a href="{% url 'all_invoices' %}" class="btn btn-outline-secondary">View More</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="footer">
+    Project by IT Department of Everbolt Engineering (Pvt) Ltd
+</div>
+
+<script>
+function previewImage(event) {
+    const fileInput = event.target;
+    const preview = document.getElementById('preview');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            submitBtn.classList.remove('d-none');
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+<script>
+    function showPreview(event) {
+        const input = event.target;
+        const preview = document.getElementById('preview');
+        const submitBtn = document.getElementById('submitBtn');
+    
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                submitBtn.classList.remove('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    </script>
+    
+</body>
+</html>

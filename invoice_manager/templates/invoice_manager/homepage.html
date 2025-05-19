@@ -1,0 +1,57 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<style>
+  .home-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 1rem;
+    min-height: 100vh;
+    background: linear-gradient(to right, #057E3F, #012F18);
+    color: #fff;
+  }
+  .home-heading {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 3rem;
+  }
+  .upload-card {
+    background: #fff;
+    color: #212529;
+    border-radius: 16px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+  }
+  .upload-card:hover {
+    transform: translateY(-4px);
+  }
+  .upload-btn {
+    font-size: 1.25rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    border-radius: 8px;
+  }
+</style>
+
+<div class="home-section">
+  <div class="home-heading">📂 Choose Invoice Category</div>
+
+  <div class="upload-card">
+    <a href="{% url 'vat_page' %}" class="btn upload-btn" style="background-color: #057E3F; color: #fff;">📄 Upload VAT Invoice</a>
+  </div>
+
+  <div class="upload-card">
+    <a href="{% url 'svat_page' %}" class="btn upload-btn" style="background-color: #2C7A7B; color: #fff;">📄 Upload SVAT Invoice</a>
+  </div>
+
+  <div class="upload-card">
+    <a href="{% url 'non_vat_page' %}" class="btn upload-btn" style="background-color: #EDB518; color: #212529;">📄 Upload NON-VAT Invoice</a>
+  </div>
+</div>
+{% endblock %}
