@@ -1,11 +1,15 @@
 {% extends 'layouts/base.html' %}
 
+
+
 {% block content %}
+
 <style>
   body {
     background: linear-gradient(to right, #057E3F, #012F18);
     color: #fff;
-    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+    padding-bottom: 3rem;
   }
 
   .container {
@@ -13,32 +17,35 @@
   }
 
   h3 {
-    font-size: 1.6rem;
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin: 1rem 0 2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
   }
 
-  .form-control {
-    font-size: 1.1rem;
-    height: 3rem;
+  .form-control, .input-group-text, .btn {
+    border-radius: 10px !important;
+    font-size: 1rem;
+    min-height: 45px;
   }
 
-  .btn {
-    font-size: 1.1rem;
-    padding: 0.75rem;
+  .btn-success {
+    background-color: #28a745;
+    border: none;
+    font-weight: bold;
   }
 
   .card {
-    background: #fff;
+    background-color: #ffffff;
     color: #000;
-    border-radius: 12px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     padding: 1.5rem;
     margin-top: 2rem;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
   }
 
   .invoice-row {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e0e0e0;
     padding: 1rem 0;
   }
 
@@ -46,51 +53,85 @@
     border: none;
   }
 
-  .invoice-row small {
-    display: block;
-    font-size: 0.9rem;
+  .invoice-code {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+  }
+
+  .invoice-meta {
+    font-size: 0.85rem;
     color: #666;
   }
 
-  .btn-sm {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
+  .badge-uploader {
+    font-size: 0.75rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 8px;
+    padding: 3px 8px;
+    margin-left: 5px;
   }
 
-  .back-button {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background-color: #ffffff;
-  color: #057E3F;
-  font-weight: bold;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  text-decoration: none;
-  z-index: 999;
-}
-.back-button:hover {
-  background-color: #f2f2f2;
-  text-decoration: none;
-}
 
+
+  .back-button {
+    position: fixed;
+    top: 4.5rem;
+    left: 1rem;
+    background-color: #ffffff;
+    color: #057E3F;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    text-decoration: none;
+    z-index: 1050;
+    display: inline-block;
+    line-height: 1.2;
+    border: none;
+  }
+
+  .back-button:hover {
+    background-color: #f1f1f1;
+    text-decoration: none;
+  }
+
+  @media (max-width: 576px) {
+    .back-button {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.9rem;
+      top: 4rem;
+    }
+  }
 </style>
-<a href="{% url 'homepage' %}" class="btn btn-light back-button">← Back</a>
+
+<a href="{% url 'homepage' %}" class="back-button d-inline d-sm-none">←</a>
+<a href="{% url 'homepage' %}" class="btn back-button d-none d-sm-inline">← Back</a>
+
+
 <div class="container">
-  <h3 class="text-center my-4">📥 Upload VAT Invoice</h3>
+  <h3>📤 Upload {{ category }} Invoice</h3>
 
   <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="mb-3">
-      <input type="file" name="file" accept="image/*,application/pdf" class="form-control">
+      <label class="form-label">Invoice File</label>
+      <input type="file" name="file" class="form-control" accept="image/*,application/pdf" required>
     </div>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text">{{ prefix }}</span>
+      <input type="text" name="code_suffix" class="form-control" placeholder="e.g. 23423" required>
+    </div>
+
     <button type="submit" class="btn btn-success w-100">Submit</button>
   </form>
 
   <div class="card mt-5">
     <form method="get" class="mb-3">
-      <input type="text" name="q" value="{{ query }}" class="form-control mb-2" placeholder="Search by formatted code (e.g., VILTS-41816)">
+      <input type="text" name="q" value="{{ query }}" class="form-control mb-2" placeholder="Search by code (e.g., {{ prefix }}12345)">
       <button type="submit" class="btn btn-outline-success">Search</button>
     </form>
 
@@ -100,11 +141,14 @@
     {% for invoice in invoices %}
     <div class="invoice-row d-flex justify-content-between align-items-center">
       <div>
-        <strong>{{ invoice.code }}</strong><br>
-        <small>{{ invoice.uploaded_at|date:"Y-m-d H:i A" }}</small>
+        <div class="invoice-code">{{ invoice.code }}</div>
+        <div class="invoice-meta">
+          {{ invoice.uploaded_at|date:"Y-m-d H:i A" }}
+          <span class="badge-uploader">by {{ invoice.uploaded_by.username }}</span>
+        </div>
       </div>
-      <div>
-        <a href="{{ invoice.file.url }}" class="btn btn-sm btn-outline-primary" download>Download</a>
+      <div class="mt-2 mt-sm-0">
+        <a href="{{ invoice.file.url }}" class="btn btn-sm btn-outline-primary me-2" download>Download</a>
         {% if user.is_superuser %}
         <a href="{% url 'delete_invoice' invoice.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
         {% endif %}

@@ -9,39 +9,22 @@ import os
 import hashlib
 
 from django.contrib.auth.views import LoginView
-from .forms import InvoiceForm
 from .models import Invoice
-
-from django.db.models.functions import TruncMonth
-from django.db.models import Count
-from datetime import datetime, timedelta
 from django.core.paginator import Paginator
 
 # ✅ Custom login view class
 class CustomLoginView(LoginView):
     template_name = 'invoice_manager/login.html'
 
-# ✅ Auto ID format mapping
-CATEGORY_CODES = {
-    'VAT': ('VILTS-', 41816),
-    'SVAT': ('VILSS-', 22381),
-    'NON-VAT': ('NON-', 1000),
+# ✅ Prefix mapping
+CATEGORY_PREFIXES = {
+    'VAT': 'VILTS-',
+    'SVAT': 'VILSS-',
+    'NON-VAT': 'VILCS-',
+    'DELIVERY': 'WH/OUT-',
+    'SAMPLE': 'WH/CST-',
+    'WARRANTY': 'WRT-',
 }
-
-def get_next_invoice_code(category):
-    prefix, start = CATEGORY_CODES.get(category, ('INV-', 1))
-    last_invoice = (
-        Invoice.objects.filter(category=category, code__startswith=prefix)
-        .order_by('-uploaded_at')
-        .first()
-    )
-    if last_invoice and last_invoice.code:
-        try:
-            last_number = int(last_invoice.code.replace(prefix, ''))
-            return f"{prefix}{last_number + 1}"
-        except:
-            pass
-    return f"{prefix}{start}"
 
 def get_file_hash(file):
     hasher = hashlib.md5()
@@ -81,6 +64,7 @@ def all_invoices(request):
 @csrf_exempt
 @login_required
 def handle_upload_view(request, category, template):
+    prefix = CATEGORY_PREFIXES.get(category, 'INV-')
     query = request.GET.get('q', '')
     invoices = Invoice.objects.filter(category=category).order_by('-uploaded_at')
 
@@ -89,25 +73,28 @@ def handle_upload_view(request, category, template):
 
     if request.method == 'POST' and request.FILES.get('file'):
         file = request.FILES['file']
-        if file.content_type in ['application/pdf', 'image/jpeg', 'image/jpg']:
+        suffix = request.POST.get('code_suffix') or request.POST.get('custom_number', '')
+        suffix = suffix.strip()
+
+
+        if file.content_type in ['application/pdf', 'image/jpeg', 'image/jpg'] and suffix:
+            full_code = f"{prefix}{suffix}"
+
             file_hash = get_file_hash(file)
 
-            # Check for duplicates
             if not Invoice.objects.filter(file_hash=file_hash, category=category).exists():
-                invoice_code = get_next_invoice_code(category)
-                file.name = f"{invoice_code}.{file.name.split('.')[-1]}"
+                file.name = f"{full_code}.{file.name.split('.')[-1]}"
                 invoice = Invoice(
                     file=file,
                     uploaded_at=timezone.now(),
                     uploaded_by=request.user,
                     category=category,
-                    code=invoice_code,
+                    code=full_code,
                     file_hash=file_hash
                 )
                 invoice.save()
             return redirect(request.path)
 
-    # Monthly summary
     today = timezone.now()
     month_start = today.replace(day=1)
     total_this_month = invoices.filter(uploaded_at__gte=month_start).count()
@@ -119,6 +106,7 @@ def handle_upload_view(request, category, template):
         'total_this_month': total_this_month,
         'current_month': current_month,
         'category': category,
+        'prefix': prefix,
     }
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -127,7 +115,7 @@ def handle_upload_view(request, category, template):
 
     return render(request, template, context)
 
-# Individual views
+# ✅ Individual category views
 @login_required
 def vat_page(request):
     return handle_upload_view(request, category='VAT', template='invoice_manager/vat_page.html')
@@ -139,6 +127,18 @@ def svat_page(request):
 @login_required
 def non_vat_page(request):
     return handle_upload_view(request, category='NON-VAT', template='invoice_manager/non_vat_page.html')
+
+@login_required
+def delivery_page(request):
+    return handle_upload_view(request, category='DELIVERY', template='invoice_manager/delivery_page.html')
+
+@login_required
+def sample_page(request):
+    return handle_upload_view(request, category='SAMPLE', template='invoice_manager/sample_page.html')
+
+@login_required
+def warranty_page(request):
+    return handle_upload_view(request, category='WARRANTY', template='invoice_manager/warranty_page.html')
 
 @login_required
 def homepage_view(request):

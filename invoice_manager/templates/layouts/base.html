@@ -1,26 +1,51 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>{% block title %}Invoice System{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="{% static 'manifest.json' %}">
+  <script src="{% static 'serviceworker.js' %}"></script>
   <style>
     body {
       background: linear-gradient(to right, #0f9b0f, #000000);
       color: white;
+      padding-top: 70px; /* space for fixed navbar */
+    }
+    .navbar-brand img {
+      height: 40px;
+    }
+    .navbar-text {
+      font-weight: 600;
     }
   </style>
-
-<link rel="manifest" href="/static/manifest.json">
-<script src="/static/serviceworker.js"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-
 </head>
 <body>
-  <nav class="navbar navbar-light bg-light justify-content-end">
-    <span class="me-3">Hi, {{ request.user.username }}</span>
-    <a href="{% url 'logout' %}" class="btn btn-outline-danger me-4">Logout</a>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm px-3">
+    <div class="container-fluid justify-content-between align-items-center d-flex">
+
+      <!-- Left: Username -->
+      <div class="navbar-text text-dark me-auto">
+        Hi, {{ user.username }}
+      </div>
+
+      <!-- Center: Logo -->
+      <div class="mx-auto text-center">
+        <a class="navbar-brand" href="#">
+          <img src="{% static 'images/logo.png' %}" alt="Logo">
+        </a>
+      </div>
+
+      <!-- Right: Logout Button -->
+      <div class="ms-auto">
+        <form method="post" action="{% url 'logout' %}" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger btn-sm">Logout</button>
+        </form>
+      </div>
+    </div>
   </nav>
 
   {% block content %}

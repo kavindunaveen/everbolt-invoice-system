@@ -6,36 +6,59 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 4rem 1rem;
+    padding: 3rem 1rem;
     min-height: 100vh;
     background: linear-gradient(to right, #057E3F, #012F18);
     color: #fff;
   }
+
   .home-heading {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 600;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
+    text-align: center;
   }
+
   .upload-card {
     background: #fff;
     color: #212529;
-    border-radius: 16px;
-    padding: 2rem;
+    border-radius: 14px;
+    padding: 1.5rem;
     width: 100%;
-    max-width: 400px;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    max-width: 360px;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
     transition: transform 0.2s ease;
+    text-align: center;
   }
+
   .upload-card:hover {
-    transform: translateY(-4px);
+    transform: scale(1.02);
   }
+
   .upload-btn {
-    font-size: 1.25rem;
-    font-weight: 500;
+    font-size: 1.1rem;
+    font-weight: 600;
     padding: 0.75rem 1rem;
     width: 100%;
     border-radius: 8px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  @media (max-width: 576px) {
+    .home-heading {
+      font-size: 1.5rem;
+    }
+
+    .upload-btn {
+      font-size: 1rem;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .upload-card {
+      padding: 1.2rem;
+    }
   }
 </style>
 
@@ -52,6 +75,18 @@
 
   <div class="upload-card">
     <a href="{% url 'non_vat_page' %}" class="btn upload-btn" style="background-color: #EDB518; color: #212529;">📄 Upload NON-VAT Invoice</a>
+  </div>
+
+  <div class="upload-card">
+    <a href="{% url 'delivery_page' %}" class="btn upload-btn" style="background-color: #1e08df; color: #ffffff;">📦 Delivery Note</a>
+  </div>
+
+  <div class="upload-card">
+    <a href="{% url 'sample_page' %}" class="btn upload-btn" style="background-color: #00b62d; color: #ffffff;">📦 Sample Transfer</a>
+  </div>
+
+  <div class="upload-card">
+    <a href="{% url 'warranty_page' %}" class="btn upload-btn" style="background-color: #eb1022; color: #ffffff;">🛠️ Warranty Claim</a>
   </div>
 </div>
 {% endblock %}
