@@ -1,4 +1,5 @@
 from django.urls import path, include
+from . import views
 from .views import (
     CustomLoginView,
     delete_invoice,
@@ -11,6 +12,7 @@ from .views import (
     sample_page,
     warranty_page,
 )
+
 
 urlpatterns = [
     # Homepage (access via http://localhost:port/)
@@ -26,6 +28,19 @@ urlpatterns = [
     path('delivery/', delivery_page, name='delivery_page'),
     path('sample/', sample_page, name='sample_page'),
     path('warranty/', warranty_page, name='warranty_page'),
+
+    # Add these after the category pages
+  path('vat/all/', views.vat_all_view, name='vat_all'),
+  path('svat/all/', views.svat_all_view, name='svat_all'),
+  path('non-vat/all/', views.non_vat_all_view, name='non_vat_all'),
+  path('delivery/all/', views.delivery_all_view, name='delivery_all'),
+  path('sample/all/', views.sample_all_view, name='sample_all'),
+  path('warranty/all/', views.warranty_all_view, name='warranty_all'),
+
+
+    
+
+
 
     # Shared invoice actions
     path('delete/<int:invoice_id>/', delete_invoice, name='delete_invoice'),

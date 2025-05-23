@@ -1,0 +1,21 @@
+{
+    "name": "Everbolt Invoices",
+    "short_name": "Invoices",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#057E3F",
+    "icons": [
+      {
+        "src": "/static/img/icon-192x192.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "/static/img/icon-512x512.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+  }
+  

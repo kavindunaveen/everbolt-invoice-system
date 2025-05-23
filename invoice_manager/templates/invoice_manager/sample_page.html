@@ -124,6 +124,11 @@
 
     <button type="submit" class="btn btn-success w-100">Submit</button>
   </form>
+  {% if error_message %}
+  <div class="alert alert-danger mt-3">
+    {{ error_message }}
+  </div>
+{% endif %}
 
   <div class="card mt-5">
     <form method="get" class="mb-3">
@@ -153,6 +158,13 @@
     {% empty %}
     <p>No invoices uploaded yet.</p>
     {% endfor %}
+
+    {% if invoices|length >= 10 %}
+  <div class="text-center mt-3">
+    <a href="{% url 'sample_all' %}" class="btn btn-outline-light">View More</a>
+  </div>
+{% endif %}
+
   </div>
 </div>
 {% endblock %}

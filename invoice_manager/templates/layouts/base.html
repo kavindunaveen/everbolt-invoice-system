@@ -9,8 +9,63 @@
   <link rel="manifest" href="{% static 'manifest.json' %}">
   <script src="{% static 'serviceworker.js' %}"></script>
   <style>
+    .invoice-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      color: #000;
+    }
+  
+    .invoice-card small {
+      color: #555;
+      font-size: 0.85rem;
+    }
+  
+    .invoice-card strong {
+      font-size: 1.1rem;
+      color: #007244;
+    }
+  
+    .invoice-actions .btn {
+      margin-left: 5px;
+    }
+  
+    .search-bar input[type="text"] {
+      height: 42px;
+      padding: 0 12px;
+    }
+  
+    .search-bar button {
+      margin-top: 10px;
+    }
+  
+    .btn-outline-primary {
+      border-color: #007244;
+      color: #007244;
+    }
+  
+    .btn-outline-primary:hover {
+      background-color: #007244;
+      color: white;
+    }
+  
+    .btn-outline-danger:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+  
+    .list-group-item {
+      background-color: white;
+      border: none;
+      padding: 20px;
+    }
+  </style>
+  
+  <style>
     body {
-      background: linear-gradient(to right, #0f9b0f, #000000);
+      background: linear-gradient(to right, #007244, #007244);
       color: white;
       padding-top: 70px; /* space for fixed navbar */
     }

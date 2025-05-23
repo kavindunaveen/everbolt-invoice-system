@@ -1,0 +1,57 @@
+{% extends 'layouts/base.html' %}
+
+
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'homepage' %}" class="btn btn-light mb-3">← Back</a>
+  <h4 class="mb-4 text-white">{{ category }} Invoices – All</h4>
+
+  <form method="get" class="mb-4">
+    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search by code">
+    <button type="submit" class="btn btn-outline-primary mt-2">Search</button>
+  </form>
+
+  {% if page_obj %}
+    <div class="mb-4">
+      {% for invoice in page_obj %}
+      <div class="invoice-card">
+        <div class="row align-items-center">
+          <div class="col-md-9 col-12 mb-2 mb-md-0">
+            <strong>{{ invoice.code }}</strong><br>
+            <small>Uploaded: {{ invoice.uploaded_at|date:"Y-m-d H:i A" }}</small><br>
+            <small>By: {{ invoice.uploaded_by.username }}</small>
+          </div>
+          <div class="col-md-3 col-12 text-md-end">
+            <a href="{{ invoice.file.url }}" class="btn btn-sm btn-outline-primary me-2" download>Download</a>
+            {% if user.is_superuser %}
+            <a href="{% url 'delete_invoice' invoice.id %}" class="btn btn-sm btn-outline-danger">Delete</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      {% endfor %}
+    </div>
+
+    <nav>
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a>
+          </li>
+        {% endif %}
+        <li class="page-item disabled">
+          <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% else %}
+    <p class="text-white">No invoices found.</p>
+  {% endif %}
+</div>
+{% endblock %}
